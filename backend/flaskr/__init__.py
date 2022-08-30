@@ -42,16 +42,16 @@ def create_app(test_config=None):
     @app.route('/categories')
     def get_categories():
         categories = Category.query.order_by(Category.id).all()
-        category = [category.format() for category in categories]
+        current_Category = {category.format() for category in categories}
         
 
-        if len(category)==0:
+        if len(categories)==0:
             abort(404)
 
 
         return jsonify({
             "success":True,
-            "categories":category
+            "categories":current_Category
         })
 
     @app.route('/questions', methods=['GET'])
@@ -105,6 +105,30 @@ def create_app(test_config=None):
     the form will clear and the question will appear at the end of the last page
     of the questions list in the "List" tab.
     """
+    @app.route('/questions', methods=['POST'])
+    def create_question():
+        body = request.get_json()
+
+        new_question = body.get('question', None)
+        new_answer = body.get('answer', None)
+        new_difficulty = body.get('difficulty', None)
+        new_category = body.get('category', None)
+
+        try:
+             question = Question(question=new_question, 
+             answer=new_answer, difficulty=new_difficulty, category=new_category )
+
+             question.insert()
+             selection = Question.query.order_by(Question.id).all()
+
+             current_questions = paginate_questions(request, selection)
+             return jsonify({
+                 'success':True,
+                 'created':question.id,
+                 'questions': current_questions
+                 })
+        except:
+            abort(422)
 
     """
     @TODO:
