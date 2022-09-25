@@ -1,10 +1,10 @@
-
 import os
 from unicodedata import category
 from flask import Flask, request, abort, jsonify
 from flask_sqlalchemy import SQLAlchemy
 from flask_cors import CORS
 import random
+
 
 from models import setup_db, Question, Category
 
@@ -63,7 +63,7 @@ def create_app(test_config=None):
     def get_questions():
         selection = Question.query.order_by(Question.id).all()
         current_questions = paginate_questions(request, selection)
-        current_categories = []
+        current_categories = None
         categories = Category.query.order_by(Category.type).all()
 
         if len(current_questions) == 0:
@@ -73,15 +73,15 @@ def create_app(test_config=None):
             'success':True,
             'questions': current_questions,
             'total_questions': len(selection),
-            'current_categories': current_categories,
-            'categories': {category.id : category.type for category in categories}
+            'categories': {category.id : category.type for category in categories},
+            'current_categories': current_categories
         })
 
     
     @app.route('/questions/<int:question_id>', methods=(['DELETE']))
     def delete_question(question_id):
         try:
-            question = Question.query.filter(Question.id==question_id).one_or_none()
+            question = Question.query.get(question_id)
 
             if question is None:
                 abort(404)
@@ -118,8 +118,9 @@ def create_app(test_config=None):
 
         new_question = body.get('question', None)
         new_answer = body.get('answer', None)
-        new_category = body.get('category', None)
         new_difficulty = body.get('difficulty', None)
+        new_category = body.get('category', None)
+        
         try:
         
             question = Question(question=new_question, 
@@ -298,5 +299,5 @@ def create_app(test_config=None):
         "error": 500,
         "message": "Internal server error"
         })
-        return app
+    return app
 
