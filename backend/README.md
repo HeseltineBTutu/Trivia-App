@@ -74,9 +74,10 @@ Introduction
 
 **Endpoints**
 **GET /categories**
-  * General: 
+    * General: 
     * Fetch all availabe categories.
   * Example: curl http://127.0.0.1:5000/categories
+```
   {
   "categories": {
     "1": "Science", 
@@ -88,10 +89,12 @@ Introduction
   }, 
   "success": true
 }
-**GET /questions**
+
+```**GET /questions**
   General:
     * Fetches all available questions of all categories in a paginated group of 10.
     * Example: curl http://127.0.0.1:5000/questions?page=<page_number>
+```
        "categories": {
     "1": "Science",
     "2": "Art",
@@ -176,7 +179,8 @@ Introduction
   "success": true,
   "total_questions": 57
 }
-**DELETE /questions/<int:question_id>**
+
+```**DELETE /questions/<int:question_id>**
     * General: Deletes a question with given ID if it exists. Returns the id of the deleted question, success value, total quesions, and question list based on current page number to update the frontend.
     * Example: curl -X DELETE http://127.0.0.1:5000/questions/<question_id> 
 
@@ -230,4 +234,17 @@ Introduction
   ], 
   "success": true, 
   "total_questions": 2
+}
+**POST /quizzes**
+*   General: Fetches one random question within a specified category.
+Example: 
+{
+  "question": {
+    "answer": "The Liver", 
+    "category": 1, 
+    "difficulty": 4, 
+    "id": 20, 
+    "question": "What is the heaviest organ in the human body?"
+  }, 
+  "success": true
 }
