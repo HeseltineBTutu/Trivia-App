@@ -90,7 +90,7 @@ Introduction
   "success": true
 }
 
-```**GET /questions**
+**GET /questions**
   General:
     * Fetches all available questions of all categories in a paginated group of 10.
     * Example: curl http://127.0.0.1:5000/questions?page=<page_number>
@@ -179,8 +179,8 @@ Introduction
   "success": true,
   "total_questions": 57
 }
-
-```**DELETE /questions/<int:question_id>**
+```
+**DELETE /questions/<int:question_id>**
     * General: Deletes a question with given ID if it exists. Returns the id of the deleted question, success value, total quesions, and question list based on current page number to update the frontend.
     * Example: curl -X DELETE http://127.0.0.1:5000/questions/<question_id> 
 
@@ -191,14 +191,18 @@ Introduction
 **POST /questions**
   * General: Add a new question to the current of available questions.
   * Example: curl POST http://127.0.0.1:5000/questions
+```
   {
     "created" : 13
     "succes" : true 
   }
-  **POST /questions/search**
+
+```  
+**POST /questions/search**
     * General: Fetches all questions where a substring matches the search term.
     * Example: curl -X POST -H "Content-Type: application/json" -d '{"searchTerm": "peanut butter"}' 
       {
+```
   "questions": [
     {
       "answer": "George Washington Carver", 
@@ -235,9 +239,12 @@ Introduction
   "success": true, 
   "total_questions": 2
 }
+
+```
 **POST /quizzes**
 *   General: Fetches one random question within a specified category.
 Example: 
+```
 {
   "question": {
     "answer": "The Liver", 
@@ -248,3 +255,4 @@ Example:
   }, 
   "success": true
 }
+```
