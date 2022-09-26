@@ -179,6 +179,7 @@ Introduction
   "success": true,
   "total_questions": 57
 }
+
 ```
 **DELETE /questions/<int:question_id>**
     * General: Deletes a question with given ID if it exists. Returns the id of the deleted question, success value, total quesions, and question list based on current page number to update the frontend.
