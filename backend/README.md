@@ -89,9 +89,10 @@ Introduction
   }, 
   "success": true
 }
+```
 
 **GET /questions**
-  General:
+  * General:
     * Fetches all available questions of all categories in a paginated group of 10.
     * Example: curl http://127.0.0.1:5000/questions?page=<page_number>
 ```
@@ -216,10 +217,12 @@ Introduction
   "success": true, 
   "total_questions": 1
 }
+```
 **GET /categories/int:id/questions**
     * General: Fetch a question on a specific category with using id
     * Example: curl http://127.0.0.1:5000/categories/2/questions
-  {
+```
+ {
   "current_category": "Art", 
   "questions": [
     {
