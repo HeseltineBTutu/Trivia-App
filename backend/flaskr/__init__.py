@@ -76,7 +76,7 @@ def create_app(test_config=None):
                 category.id: category.type for category in categories},
             'currentCategory': None
 
-            
+
         })
 
     @app.route('/questions/<int:question_id>', methods=(['DELETE']))
@@ -84,20 +84,20 @@ def create_app(test_config=None):
         '''
         Endpoint to DELETE question using a question ID.
         '''
-        
+
         question = Question.query.get(question_id)
 
         if not question:
-                abort(404)
+            abort(404)
 
         try:
             question.delete()
 
             return jsonify({
-                    'success': True,
-                    'deleted': question_id
+                'success': True,
+                'deleted': question_id
             })
-        except:
+        except BaseException:
 
             abort(422)
 
@@ -156,7 +156,7 @@ def create_app(test_config=None):
     """
     @app.route('/questions/search', methods=['POST'])
     def search_questions():
-        searchTerm = request.args.get('search')
+        searchTerm = request.json.get('searchTerm')
         try:
 
             if searchTerm is None:
@@ -192,14 +192,14 @@ def create_app(test_config=None):
                 Question.category == str(category_id)).all()
             formated_questions = [question.format() for question in questions]
 
-            if category is None:
+            if category_id is None:
                 abort(404)
 
             return jsonify({
                 'success': True,
                 'questions': formated_questions,
                 'totalQuestions': len(questions),
-                'currentCategory': category.type
+                'currentCategory': category_id
 
             })
         except BaseException:
@@ -218,35 +218,43 @@ def create_app(test_config=None):
     """
     @app.route('/quizzes', methods=['POST'])
     def get_question_to_play():
-        body = request.get_json
-        previous_questions = body.get('previous_question', None)
-        category = body.get('quiz_category', None)
 
-        if category['id'] == 0:
-            new_quizzes = Question.query.filter(
-                Question.id.not_in(previous_questions)).all()
-            formatted_quiz = []
+        body = request.get_json()
+        category = body.get('quiz_category')
+        previous_questions = body.get('previous_question')
+        category_id = category['id']
 
-            for question in new_quizzes:
-                formatted_quiz.append(question.format())
-        else:
-            new_quizzes = Question.query.filter(Question.id.not_in(
-                previous_questions), Question.category == str(['id'])).all()
+        try:
 
-            forrmated_quiz = []
+            if category_id == 0:
+                new_quizzes = Question.query.filter(
+                    Question.id.notin_(previous_questions),
+                    Question.category == category_id).all()
+                formatted_quiz = []
 
-            for question in new_quizzes:
+                for question in new_quizzes:
+                    formatted_quiz.append(question.format())
+                else:
+                    new_quizzes = Question.query.filter(
+                        Question.id.notin_(previous_questions),
+                        Question.category == category_id).all()
 
-                forrmated_quiz.append(question.format())
+                    formated_quiz = []
 
-                current_question = None
-                if formatted_quiz:
-                    current_question = random.choice(formatted_quiz)
+                    for question in new_quizzes:
 
-                return jsonify({
-                    'success': True,
-                    'question': current_question
-                })
+                        formated_quiz.append(question.format())
+
+                        current_question = None
+                        if formatted_quiz:
+                            current_question = random.choice(formatted_quiz)
+
+            return jsonify({
+                'success': True,
+                'question': current_question
+            })
+        except BaseException:
+            abort(422)
 
     """
     @TODO:
