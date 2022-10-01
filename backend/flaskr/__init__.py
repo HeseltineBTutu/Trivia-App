@@ -1,8 +1,9 @@
+from ast import If
 import os
-from unicodedata import category
 from flask import Flask, request, abort, jsonify
 from flask_sqlalchemy import SQLAlchemy
 from flask_cors import CORS
+from models import db
 import random
 
 
@@ -52,18 +53,25 @@ def create_app(test_config=None):
         End point to get all available categories
 
         '''
-        categories = Category.query.order_by(Category.type).all()
-        if len(categories) == 0:
+        query_categories = Category.query.order_by(Category.id).all()
+        if len(query_categories) == 0:
             abort(404)
 
-        return jsonify({"categories": {
-                       category.id: category.type for category in categories}})
+        else:
+             
+             categories = { category.id: category.type for category in query_categories }
 
+
+
+        return jsonify({"categories": categories
+        })
     @app.route('/questions')
     def get_questions():
-        questions = Question.query.order_by(Question.id).all()
+        
         categories = Category.query.order_by(Category.type).all()
-        paginated_questions = paginate_questions(request, questions)
+        selection = Question.query.order_by(Question.id).all()
+
+        paginated_questions = paginate_questions(request, selection)
 
         if len(paginated_questions) == 0:
             abort(404)
@@ -71,10 +79,10 @@ def create_app(test_config=None):
         return jsonify({
             'success': True,
             'questions': paginated_questions,
-            'totalQuestions': len(questions),
+            'totalQuestions': len(selection),
             'categories': {
                 category.id: category.type for category in categories},
-            'currentCategory': None
+            'currentCategory': []
 
 
         })
@@ -218,43 +226,60 @@ def create_app(test_config=None):
     """
     @app.route('/quizzes', methods=['POST'])
     def get_question_to_play():
-
-        body = request.get_json()
-        category = body.get('quiz_category')
-        previous_questions = body.get('previous_question')
-        category_id = category['id']
-
         try:
+            body = request.get_json()
+            previous_questions = body.get('previous_questions', None)
+            quiz_category = body.get('quiz_category', None)
+             
+            if quiz_category:
+                quiz_list = Question.query.filter(Question.category == quiz_category['id']).all()
+                
+                if quiz_category['id'] == 0:
+                    quiz_list = Question.query.order_by(Question.id).all()
+        
+            available_ids = [question.id for question in quiz_list]
+            random_num = random.choice([num for num in available_ids if num not in previous_questions])
+            
+            question = Question.query.filter(Question.id == random_num).one_or_none()
+            previous_questions.append(question.id)
+            print('count previous_quetions', len(previous_questions))
+            
+            return jsonify(
+                {
+                    'success': True,
+                    'question': question.format()
+                }
+            )
+            
+        except:
+            abort(404)       
+    
 
-            if category_id == 0:
-                new_quizzes = Question.query.filter(
-                    Question.id.notin_(previous_questions),
-                    Question.category == category_id).all()
-                formatted_quiz = []
 
-                for question in new_quizzes:
-                    formatted_quiz.append(question.format())
-                else:
-                    new_quizzes = Question.query.filter(
-                        Question.id.notin_(previous_questions),
-                        Question.category == category_id).all()
+      
+        # data = request.get_json()
+        # try:
+        #     previous_questions = data("previous_questions", None)
+        #     quiz_category = data("quiz_category", None)
+        # except Exception:
+        #     abort(400)
 
-                    formated_quiz = []
+        # if int(quiz_category['id']) != 0:
+        #     category = Category.query.filter(Category.id == quiz_category.get('id')).first()
 
-                    for question in new_quizzes:
+        #     if category is None:
+        #         abort(404)
+        # elif previous_questions:
+        #     query = query.filter(Question.id.notin_(previous_questions))
+            
+        #     #get the question randomly
 
-                        formated_quiz.append(question.format())
+        # question = query.order_by(db.func.random()).first()
 
-                        current_question = None
-                        if formatted_quiz:
-                            current_question = random.choice(formatted_quiz)
-
-            return jsonify({
-                'success': True,
-                'question': current_question
-            })
-        except BaseException:
-            abort(422)
+        # return jsonify({
+        #     "success": True,
+        #     "question": question.format() if question else ""
+        # })
 
     """
     @TODO:
